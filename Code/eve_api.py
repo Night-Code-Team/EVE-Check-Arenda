@@ -11,6 +11,8 @@ info_about_constellations_url = 'https://esi.evetech.net/latest/universe/constel
 all_systems_id_url = 'https://esi.evetech.net/latest/universe/systems/?datasource=tranquility'
 info_about_sys_url = 'https://esi.evetech.net/latest/universe/systems/{}/?datasource=tranquility'
 
+sistem_id_file = 'https://github.com/Night-Code-Team/EVE-Check-Arenda/blob/main/resources/system_id.csv'
+
 
 def get_json_res(resp: str):
     return requests.get(resp).json()
@@ -111,7 +113,7 @@ def get_system_DF() -> pd.DataFrame:
     - Если файл не найден, возвращаяется None
     '''
     try:
-        data = pd.read_csv('system_id.csv')
+        data = pd.read_csv(f'{sistem_id_file}?raw=true')
     except Exception as err:
         create_log_file(err)
         return None

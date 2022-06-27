@@ -57,7 +57,7 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def get_df() -> pd.DataFrame:
+def get_google_df() -> pd.DataFrame:
     '''
     Делаем запрос в Google API по данным таблицам.
     Вывод:
