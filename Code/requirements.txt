@@ -1,6 +1,7 @@
 pandas
 requests
 logging
+pyside6
 oogle-api-core==1.31.6
 google-api-python-client==1.8.0
 google-auth==1.35.0
