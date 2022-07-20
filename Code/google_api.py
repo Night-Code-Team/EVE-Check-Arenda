@@ -14,7 +14,7 @@ spreadsheet_1 = '1VYM3xUeOtx0BV831nyeeJFyUWMz5VDfoJIQ3z-35FA4'
 # table_4 = "'Immensea'!A2:G100"
 # table_5 = "'Wicked creek'!A2:G100"
 # table_6 = "'Scalding Pass'!A2:G100"
-# table_7 = "'Cache'!A10:G100"        # Снос на 11 строку
+# table_7 = "'Cache'!A2:G100"
 # table_8 = "'Feythabolis'!A2:G100"   # Регион не подключен
 range_1 = ("'XIX price list Detorid'!A2:G100",
            "'XIX price list Insmother'!A2:G100",
@@ -22,7 +22,7 @@ range_1 = ("'XIX price list Detorid'!A2:G100",
            "'Immensea'!A2:G100",
            "'Wicked creek'!A2:G100",
            "'Scalding Pass'!A2:G100",
-           "'Cache'!A10:G100")  # Снос на 11 строку
+           "'Cache'!A2:G100")
 
 # Таблица RZR
 spreadsheet_2 = '1lGCFgZgrI-phRi8kGUeWki4NqosLDkGo0CDxeIa-1pg'
@@ -40,20 +40,20 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     Очищаем от лишних символов
     '''
     for i in range(len(data)):
-            st = str(data['System'][i])
-            st = st.replace('\t', '')
-            st = st.replace(' ', '')
-            data['System'][i] = st
-            st = str(data['Constellation'][i])
-            st = st.replace('\t', '')
-            st = st.replace(' ', '')
-            data['Constellation'][i] = st
-            st = str(data['Availability'][i])
-            st = st.replace('\t', '')
-            st = st.replace(' ', '')
-            st = st.replace('y', 'Y')
-            st = st.replace('n', 'N')
-            data['Availability'][i] = st
+        st = str(data['System'][i])
+        st = st.replace('\t', '')
+        st = st.replace(' ', '')
+        data['System'][i] = st
+        st = str(data['Constellation'][i])
+        st = st.replace('\t', '')
+        st = st.replace(' ', '')
+        data['Constellation'][i] = st
+        st = str(data['Availability'][i])
+        st = st.replace('\t', '')
+        st = st.replace(' ', '')
+        st = st.replace('y', 'Y')
+        st = st.replace('n', 'N')
+        data['Availability'][i] = st
     return data
 
 
@@ -68,14 +68,12 @@ def get_google_df() -> pd.DataFrame:
         service = build('sheets', 'v4', developerKey=api_key)
         all_systems_df = pd.DataFrame(columns=['System', 'System_id', 'Constellation', 'Availability'])
 
-
         def get_df_from_XIX(spreadsheetid, ranges) -> pd.DataFrame:
             request = service.spreadsheets().values().get(spreadsheetId=spreadsheetid, range=ranges)
             response = request.execute()
             df = pd.DataFrame(response['values'][1:], columns=response['values'][0])
             df = df.drop(columns=['Sec Status', 'Ice', 'Dead End', 'Price (Billions)'])
             return df
-
 
         def get_df_from_RZR(spreadsheetid, ranges) -> pd.DataFrame:
             request = service.spreadsheets().values().get(spreadsheetId=spreadsheetid, range=ranges)
@@ -85,7 +83,6 @@ def get_google_df() -> pd.DataFrame:
             df.rename(columns={'Available for rent': 'Availability'}, inplace=True)
             return df
 
-
         def get_df_from_Unr(spreadsheetid, ranges) -> pd.DataFrame:
             request = service.spreadsheets().values().get(spreadsheetId=spreadsheetid, range=ranges)
             response = request.execute()
@@ -93,15 +90,20 @@ def get_google_df() -> pd.DataFrame:
             df = df.drop(columns=['Constellation', 'Sec Status', 'Sec Class', 'Ice', 'Dead End', 'Price (Billions)'])
             return df
 
-
         # Добавляем все в единый ДФ
+        # print('Start adding XIX')
         for i in range_1:
             all_systems_df = pd.merge(all_systems_df, get_df_from_XIX(spreadsheet_1, i), how="outer")
+            # print(f'No error in {i}')
 
+        # print('Start adding RZR')
         all_systems_df = pd.merge(all_systems_df, get_df_from_RZR(spreadsheet_2, range_2), how="outer")
+        # print('No error in RZR')
 
+        # print('Start adding UNR')
         for i in range_3:
             all_systems_df = pd.merge(all_systems_df, get_df_from_Unr(spreadsheet_3, i), how="outer")
+            # print(f'No error in {i}')
 
         # Очищаем данные
         all_systems_df = clean_data(all_systems_df)
@@ -117,10 +119,3 @@ def get_google_df() -> pd.DataFrame:
         return None
     else:
         return all_systems_df
-
-
-# data = get_df()
-# print(data.head())
-# syst = 'G3D-ZT'
-# if all(data.loc[syst, 'Availability'] == 'Yes'):
-#     print(True)
